@@ -57,19 +57,23 @@
             </thead>
             <tbody id="query_result" class="hidden">
                 <tr>
-                    <td>创建时间：<lable id="create_ts"></lable>
-                    </td>
-                    <td>上次登陆：<lable id="role_login_ts"></lable>
-                    </td>
-                    <td>是否在线：<label id="is_online"></label></td>
+                    <td>ID：<label id="uuid"></label></td>
+                    <td></td>
+                    <td></td>
                 </tr>
-                <tr>
+
+                <tr id="online" class="hidden">
+                    <td>是否在线：<label id="is_online"></label></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr id="forbad_role" class="hidden">
                     <td>是否封停：<label id="is_forbad_role"></label></td>
                     <td>封停原因：<lable id="forbad_role_reason"></lable>
                     </td>
                     <td>封停截止时间：<label id="forbad_role_until_ts"></label></td>
                 </tr>
-                <tr>
+                <tr id="forbad_speak" class="hidden">
                     <td>是否禁言：<label id="is_forbad_speak"></label></td>
                     <td>禁言原因：<lable id="forbad_speak_reason"></lable>
                     </td>
@@ -97,7 +101,8 @@
     </div><!-- /.modal -->
 </div>
 
-<div class="modal fade" id="forbad_role" tabindex="-1" role="dialog">
+
+<div class="modal fade" id="forbid_role" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -125,9 +130,9 @@
         </div>
     </div><!-- /.modal -->
 </div>
-</div>
 
-<div class="modal fade" id="forbad_speak" tabindex="-1" role="dialog">
+
+<div class="modal fade" id="forbid_speak" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -156,7 +161,7 @@
         </div>
     </div><!-- /.modal -->
 </div>
-</div>
+
 
 
 
@@ -218,63 +223,49 @@
 </script>
 
 
-
-<!-- 窗口2 -->
+<!-- 控件 -->
 <script type="text/javascript">
     function kick_role() {
-        var uuid = $("#query_result").find("#uuid").html();
+        var uuid = $("#query_player").find("#uid").val();
         var server_id = $("#server").find(":selected").attr("server_id");
-        console.log(uuid, server_id)
 
-        if (uuid == "") {
-            return;
-        }
-        var tips = "是否要踢" + server_id + "," + uuid + "下线？"
-
-        if ($("#query_result").find("#is_online").html() == "离线") {
-            toastr.error("玩家不在线");
-            return;
-        }
-        $('#kick_tips').html(tips);
-        $('#kick_btn').unbind('click');
-        $('#kick_btn').click(function () {
-            $('#dlg_kick').modal('hide')
-            $.ajax({
-                type: "POST",
-                url: "/kick_role",
-                data: { uuid: uuid, server_id: server_id },
-                dataType: 'json',
-                success: function (msg) {
-                    toastr.options.positionClass = 'toast-top-center';
-                    if (msg.err) {
-                        toastr.error(msg.err);
-                        return;
-                    }
-                    toastr.success("操作成功！")
-                    $("#query_result").find("#is_online").html("离线")
+        $('#dlg_kick').modal('hide')
+        $.ajax({
+            type: "POST",
+            url: "/kick_role",
+            data: { uuid: uuid, server_id: server_id },
+            dataType: 'json',
+            success: function (msg) {
+                console.log(msg)
+                toastr.options.positionClass = 'toast-top-center';
+                if (msg.err) {
+                    toastr.error(msg.err);
+                    return;
                 }
-            });
+                toastr.success("操作成功！")
+                $("#query_result").removeClass('hidden')
+                $("#online").removeClass("hidden");
+                $("#query_result").find("#uuid").html(uuid);
+                $("#query_result").find("#is_online").html("离线");
+            }
         })
-        $('#dlg_kick').modal('show')
     }
 
 
     // 封禁
     function forbad_role() {
-        var uuid = $("#query_result").find("#uuid").html();
+        var uuid = $("#query_player").find("#uid").val();
         var server_id = $("#server").find(":selected").attr("server_id");
         console.log(uuid, server_id)
 
-        if (uuid == "") {
-            return;
-        }
-        $('#forbad_role').modal('show')
+        $('#forbid_role').modal('show')
         $('#form_forbad_role').unbind('submit');
         $('#form_forbad_role').submit(function () {
             event.preventDefault()
             var forbad_reason = $("#inner_forbad_role_reason").val()
-            var forbad_until_time_stamp = Date.parse($('#inner_forbad_role_time').data().date).toString();
+            var forbad_until_time_stamp = (Date.parse($('#inner_forbad_role_time').data().date) / 1000).toString();
             var forbad_until_time = forbad_until_time_stamp.substr(0, forbad_until_time_stamp.length - 3);
+            console.log(forbad_until_time, forbad_until_time_stamp)
             if (forbad_until_time == null || forbad_until_time == "") {
                 toastr.options.positionClass = 'toast-top-center';
                 toastr.error("请选择封禁截止时间");
@@ -286,72 +277,71 @@
                 data: { server_id: server_id, uuid: uuid, forbad_reason: forbad_reason, forbad_until_time: forbad_until_time },
                 dataType: 'json',
                 success: function (msg) {
+                    console.log(msg)
                     toastr.options.positionClass = 'toast-top-center';
                     if (msg.err) {
                         toastr.error(msg.err);
                         return;
                     }
                     toastr.success("操作成功")
+                    $("#query_result").removeClass('hidden')
+                    $("#forbad_role").removeClass('hidden')
+                    $("#query_result").find("#uuid").html(uuid);
                     $("#query_result").find("#is_forbad_role").html("被封停")
                     $("#query_result").find("#forbad_role_reason").html(forbad_reason)
-                    $("#query_result").find("#forbad_role_until_ts").html(new Date(forbad_until_time * 1000).format("yyyy-MM-dd EE HH:mm:ss"))
+                    $("#query_result").find("#forbad_role_until_ts").html(new Date(msg.end_ts * 1000).format("yyyy-MM-dd EE HH:mm:ss"))
+                    $('#form_forbad_role')[0].reset() //cal Dom's reset
+                    $('#forbad_role').modal('hide')
                 }
             });
-            $('#form_forbad_role')[0].reset() //cal Dom's reset
-            $('#forbad_role').modal('hide')
         })
     }
+
 
     function remove_forbad_role() {
-        var uuid = $("#query_result").find("#uuid").html();
+        var uuid = $("#query_player").find("#uid").val();
         var server_id = $("#server").find(":selected").attr("server_id");
-        console.log(uuid, server_id)
 
-        if (uuid == "") {
-            return;
-        }
-        var tips = "是否要对玩家" + server_id + ", " + uuid + "解封？"
-        $('#kick_tips').html(tips);
-        $('#kick_btn').unbind('click');
-        $('#kick_btn').click(function () {
-            $('#dlg_kick').modal('hide')
-            $.ajax({
-                type: "POST",
-                url: "/remove_forbad_role",
-                data: { uuid: uuid, server_id: server_id },
-                dataType: 'json',
-                success: function (msg) {
-                    toastr.options.positionClass = 'toast-top-center';
-                    if (msg.err) {
-                        toastr.error(msg.err);
-                        return;
-                    }
-                    toastr.success("操作成功！")
-                    $("#query_result").find("#is_forbad_role").html("正常")
-                    $("#query_result").find("#forbad_role_reason").html("")
-                    $("#query_result").find("#forbad_role_until_ts").html("")
+        $('#dlg_kick').modal('hide')
+        $.ajax({
+            type: "POST",
+            url: "/remove_forbad_role",
+            data: { uuid: uuid, server_id: server_id },
+            dataType: 'json',
+            success: function (msg) {
+                toastr.options.positionClass = 'toast-top-center';
+                if (msg.err) {
+                    toastr.error(msg.err);
+                    return;
                 }
-            });
+                toastr.success("操作成功！")
+                $("#query_result").removeClass('hidden')
+                $("#forbad_role").removeClass('hidden')
+                $("#query_result").find("#uuid").html(uuid);
+                $("#query_result").find("#is_forbad_role").html("正常")
+                $("#query_result").find("#forbad_role_reason").html("")
+                $("#query_result").find("#forbad_role_until_ts").html("")
+
+            }
+
         })
-        $('#dlg_kick').modal('show')
     }
 
+
     function forbad_speak() {
-        var uuid = $("#query_result").find("#uuid").html();
+        var uuid = $("#query_player").find("#uid").val();
         var server_id = $("#server").find(":selected").attr("server_id");
         console.log(uuid, server_id)
 
-        if (uuid == "") {
-            return;
-        }
         var tips = "是否对玩家" + server_id + ", " + uuid + "禁言？"
-        $('#forbad_speak').modal('show')
+        $('#forbid_speak').modal('show')
         $('#form_forbad_speak').unbind('submit');
         $('#form_forbad_speak').submit(function () {
             event.preventDefault()
             var forbad_reason = $("#inner_forbad_speak_reason").val()
-            var forbad_until_time_stamp = Date.parse($('#inner_forbad_speak_time').data().date).toString();
+            var forbad_until_time_stamp = (Date.parse($('#inner_forbad_speak_time').data().date) / 1000).toString();
             var forbad_until_time = forbad_until_time_stamp.substr(0, forbad_until_time_stamp.length - 3);
+            console.log(forbad_until_time, forbad_until_time_stamp);
             if (forbad_until_time == null || forbad_until_time == "") {
                 toastr.options.positionClass = 'toast-top-center';
                 toastr.error("请选择禁言截止时间");
@@ -369,49 +359,45 @@
                         return;
                     }
                     toastr.success("操作成功")
+                    $("#query_result").removeClass('hidden')
+                    $("#forbad_speak").removeClass('hidden')
+                    $("#query_result").find("#uuid").html(uuid);
                     $("#query_result").find("#is_forbad_speak").html("被禁言")
                     $("#query_result").find("#forbad_speak_reason").html(forbad_reason)
                     $("#query_result").find("#forbad_speak_until_ts").html(new Date(forbad_until_time * 1000).format("yyyy-MM-dd EE HH:mm:ss"))
+                    $('#form_forbad_speak')[0].reset() // cal Dom's reset
+                    $('#forbad_speak').modal('hide')
                 }
             });
-            $('#form_forbad_speak')[0].reset() // cal Dom's reset
-            $('#forbad_speak').modal('hide')
         })
     }
 
+
     function remove_forbad_speak() {
-        var uuid = $("#query_result").find("#uuid").html();
+        var uuid = $("#query_player").find("#uid").val();
         var server_id = $("#server").find(":selected").attr("server_id");
-        console.log(uuid, server_id)
+        $('#dlg_kick').modal('hide')
+        $.ajax({
+            type: "POST",
+            url: "/remove_forbad_speak",
+            data: { uuid: uuid, server_id: server_id },
+            dataType: 'json',
+            success: function (msg) {
+                toastr.options.positionClass = 'toast-top-center';
+                console.log(msg.err)
 
-        if (uuid == "") {
-            return;
-        }
-        var tips = "是否要对玩家" + server_id + ", " + uuid + "解除禁言？"
-        $('#kick_tips').html(tips);
-        $('#kick_btn').unbind('click');
-        $('#kick_btn').click(function () {
-            $('#dlg_kick').modal('hide')
-            $.ajax({
-                type: "POST",
-                url: "/remove_forbad_speak",
-                data: { uuid: uuid, server_id: server_id },
-                dataType: 'json',
-                success: function (msg) {
-                    toastr.options.positionClass = 'toast-top-center';
-                    console.log(msg.err)
-
-                    if (msg.err) {
-                        toastr.error(msg.err);
-                        return;
-                    }
-                    toastr.success("操作成功！")
-                    $("#query_result").find("#is_forbad_speak").html("正常")
-                    $("#query_result").find("#forbad_speak_reason").html("")
-                    $("#query_result").find("#forbad_speak_until_ts").html("")
+                if (msg.err) {
+                    toastr.error(msg.err);
+                    return;
                 }
-            });
+                toastr.success("操作成功！")
+                $("#query_result").removeClass('hidden')
+                $("#forbad_speak").removeClass('hidden')
+                $("#query_result").find("#uuid").html(uuid);
+                $("#query_result").find("#is_forbad_speak").html("正常")
+                $("#query_result").find("#forbad_speak_reason").html("")
+                $("#query_result").find("#forbad_speak_until_ts").html("")
+            }
         })
-        $('#dlg_kick').modal('show')
     }
 </script>

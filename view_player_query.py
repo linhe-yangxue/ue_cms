@@ -108,7 +108,7 @@ PNAME_2 = "封禁解封"
 def view_player_forbid(user):
     all_group = user_manager.get_all_group()
     all_group.sort(key=lambda v: v.num)
-    return template("player_query", curr_user=user, child="player_forbid", **(view_utils.all_funcs))
+    return template("forbid_query", curr_user=user, child="player_forbid", **(view_utils.all_funcs))
 
 
 @route('/kick_role', method='post')
@@ -133,8 +133,9 @@ def forbad_role(user):
     uuid = request.params.get("uuid")
     server_id = request.params.get("server_id")
     forbad_until_time = request.params.get("forbad_until_time")
+    print(uuid,server_id,forbad_until_time)
 
-    if not uuid:
+    if uuid == "" or uuid is None:
         return {"err": "uuid为空"}
 
     args = dict(

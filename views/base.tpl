@@ -60,13 +60,16 @@
     <div class="row">
       <div id="menu-root" class="col-sm-3 col-md-2 sidebar">
         <div class="nav list-group navside-header">
+
           <a href="#menu-user-mgr" class="list-group-item" data-toggle="collapse">账号管理</a>
-          <div id="menu-user-mgr" class="list-group navside-list{{"" if sidemenu==" user_mgr" else " collapse" }}">
+          <div id="menu-user-mgr" class="list-group navside-list{{"" if sidemenu==" user_mgr" else " collapse in" }}">
             <a href="/view_user_mgr" class="list-group-item{{get_view_class('user_mgr', child, curr_user)}}">账号管理</a>
             <a href="/view_group_mgr" class="list-group-item{{get_view_class('group_mgr', child, curr_user)}}">组管理</a>
           </div>
+
           <a href="#menu-player-mgr" class="list-group-item" data-toggle="collapse">游戏管理</a>
-          <div id="menu-player-mgr" class="list-group navside-list{{"" if sidemenu==" player_mgr" else " collapse" }}">
+          <!-- <div id="menu-player-mgr" class="list-group navside-list{{"" if sidemenu==" player_mgr" else " collapse in" }}"> -->
+          <div id="menu-player-mgr" class="list-group navside-list collapse in">
             <a href="/view_player_query"
               class="list-group-item{{get_view_class('player_query', child, curr_user)}}">玩家查询</a>
             <a href="/view_player_forbid"
@@ -74,25 +77,30 @@
             <a href="view_player_level"
               class="list-group-item{{get_view_class('level_query', child, curr_user)}}">等级修改</a>
           </div>
+
           <a href="#menu-log-mgr" class="list-group-item" data-toggle="collapse">日志管理</a>
-          <div id="menu-log-mgr" class="list-group navside-list{{"" if sidemenu==" log_mgr" else " collapse" }}">
+          <div id="menu-log-mgr" class="list-group navside-list{{"" if sidemenu==" log_mgr" else " collapse in" }}">
             <a href="/view_user_log" class="list-group-item{{get_view_class('user_log', child, curr_user)}}">后台日志</a>
             <a href="/view_role_log" class="list-group-item{{get_view_class('role_log', child, curr_user)}}">玩家日志</a>
           </div>
+
           <a href="#menu-notify-mgr" class="list-group-item" data-toggle="collapse">公告管理</a>
-          <div id="menu-notify-mgr" class="list-group navside-list{{"" if sidemenu==" notify_mgr" else " collapse" }}">
+          <!-- <div id="menu-notify-mgr" class="list-group navside-list{{"" if sidemenu==" notify_mgr" else " collapse in" }}"> -->
+          <div id="menu-notify-mgr" class="list-group navside-list collapse in">
             <a href="/view_online_notify"
               class="list-group-item{{get_view_class('online_notify', child, curr_user)}}">线上公告</a>
             <a href="/view_system_notify"
               class="list-group-item{{get_view_class('system_notify', child, curr_user)}}">系统公告</a>
           </div><!-- 改过notify -->
+
           <a href="#menu-mail-mgr" class="list-group-item" data-toggle="collapse">邮件管理</a>
-          <div id="menu-mail-mgr" class="list-group navside-list{{"" if sidemenu==" mail_mgr" else " collapse" }}">
+          <div id="menu-mail-mgr" class="list-group navside-list{{"" if sidemenu==" mail_mgr" else " collapse in" }}">
             <a href="/view_sys_mail" class="list-group-item{{get_view_class('sys_mail', child, curr_user)}}">后台邮件</a>
             <a href="/view_role_mail" class="list-group-item{{get_view_class('role_mail', child, curr_user)}}">玩家邮件</a>
           </div>
+
           <a href="#menu-other-mgr" class="list-group-item" data-toggle="collapse">其他管理</a>
-          <div id="menu-other-mgr" class="list-group navside-list{{"" if sidemenu==" other_mgr" else " collapse" }}">
+          <div id="menu-other-mgr" class="list-group navside-list{{"" if sidemenu==" other_mgr" else " collapse in" }}">
             <a href="/view_query_vip" class="list-group-item{{get_view_class('query_vip', child, curr_user)}}">充值查询</a>
             <a href="/view_query_union"
               class="list-group-item{{get_view_class('query_union', child, curr_user)}}">帮会查询</a>
@@ -218,6 +226,7 @@
       });
     });
   </script>
+
   <!-- Bootstrap core JavaScript
     ================================================== -->
   <!-- Placed at the end of the document so the pages load faster -->
